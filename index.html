@@ -37,6 +37,8 @@ h1 { margin-bottom: 0; }
 
 <script>
 const API = "https://script.google.com/macros/s/AKfycbyGXzlyH2hhTfS5KGaF5qucdjVyAacT5oz0RBnhSG4__VS8sGQcahKGg_HeOilOpvHeAw/exec";
+const SECRET = "3247";
+  
 let workouts = [];
 let exIndex = 0;
 let setNumber = 1;
@@ -59,6 +61,7 @@ function saveSet() {
   fetch(API, {
     method: "POST",
     body: JSON.stringify({
+      secret: SECRET, 
       day: new Date().toDateString(),
       routine: workouts[exIndex].routine,
       exercise: workouts[exIndex].exercise,
