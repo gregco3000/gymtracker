@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workout</title>
+
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont;
+  padding: 20px;
+}
+input, button {
+  font-size: 26px;
+  width: 100%;
+  padding: 16px;
+  margin: 12px 0;
+}
+button {
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 16px;
+}
+h1 { margin-bottom: 0; }
+</style>
+</head>
+
+<body>
+
+<h1 id="exercise">Loading…</h1>
+<h2 id="set">Set 1</h2>
+
+<input id="weight" placeholder="Weight">
+<input id="reps" placeholder="Reps">
+
+<button onclick="saveSet()">SAVE SET</button>
+
+<script>
+const API = "https://script.google.com/macros/s/AKfycbyGXzlyH2hhTfS5KGaF5qucdjVyAacT5oz0RBnhSG4__VS8sGQcahKGg_HeOilOpvHeAw/exec";
+let workouts = [];
+let exIndex = 0;
+let setNumber = 1;
+
+fetch(API)
+  .then(r => r.json())
+  .then(data => {
+    workouts = data;
+    show();
+  });
+
+function show() {
+  document.getElementById("exercise").innerText =
+    workouts[exIndex].exercise;
+  document.getElementById("set").innerText =
+    "Set " + setNumber;
+}
+
+function saveSet() {
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify({
+      day: new Date().toDateString(),
+      routine: workouts[exIndex].routine,
+      exercise: workouts[exIndex].exercise,
+      set: setNumber,
+      weight: weight.value,
+      reps: reps.value
+    })
+  });
+
+  weight.value = "";
+  reps.value = "";
+
+  if (setNumber < workouts[exIndex].sets) {
+    setNumber++;
+  } else {
+    setNumber = 1;
+    exIndex++;
+    if (exIndex >= workouts.length) {
+      alert("Workout complete 💪");
+      return;
+    }
+  }
+  show();
+}
+</script>
+
+</body>
+</html>
