@@ -155,70 +155,85 @@ function renderExercises() {
   container.innerHTML = "";
 
   workouts[currentWorkoutIndex].exercises.forEach((ex, exIndex) => {
+    // Track current set per exercise
+    if (!ex.currentSet) ex.currentSet = 1;
+
     const card = document.createElement("div");
     card.className = "exercise-card";
 
+    // Exercise header with icon
     const header = document.createElement("div");
     header.className = "exercise-header";
     const icon = document.createElement("img");
-    icon.src = ex.icon;   // replace with your icons
+    icon.src = ex.icon;
     icon.alt = ex.name;
+    icon.style.width = "40px";
+    icon.style.height = "40px";
+    icon.style.marginRight = "12px";
     const title = document.createElement("div");
     title.innerText = `${ex.name} (Target: ${ex.target})`;
     header.appendChild(icon);
     header.appendChild(title);
     card.appendChild(header);
 
-    // Render up to 6 sets
-    for (let setNum = 1; setNum <= 6; setNum++) {
-      const setRow = document.createElement("div");
-      setRow.className = "set-row";
+    // Single set input line
+    const setRow = document.createElement("div");
+    setRow.className = "set-row";
 
-      const setLabel = document.createElement("div");
-      setLabel.className = "set-label";
-      setLabel.innerText = "Set " + setNum;
-      setRow.appendChild(setLabel);
+    const setLabel = document.createElement("div");
+    setLabel.className = "set-label";
+    setLabel.innerText = "Set " + ex.currentSet;
+    setRow.appendChild(setLabel);
 
-      const weightInput = document.createElement("input");
-      weightInput.type = "number";
-      weightInput.placeholder = "Weight";
-      setRow.appendChild(weightInput);
+    const weightInput = document.createElement("input");
+    weightInput.type = "number";
+    weightInput.placeholder = "Weight";
+    setRow.appendChild(weightInput);
 
-      const repsInput = document.createElement("input");
-      repsInput.type = "number";
-      repsInput.placeholder = "Reps";
-      setRow.appendChild(repsInput);
+    const repsInput = document.createElement("input");
+    repsInput.type = "number";
+    repsInput.placeholder = "Reps";
+    setRow.appendChild(repsInput);
 
-      const recordBtn = document.createElement("button");
-      recordBtn.innerText = "Record";
-      recordBtn.onclick = () => {
-        // Post to Google Sheet
-        fetch(API, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            secret: SECRET,
-            day: new Date().toDateString(),
-            routine: workouts[currentWorkoutIndex].name,
-            exercise: ex.name,
-            set: setNum,
-            weight: weightInput.value,
-            reps: repsInput.value
-          })
-        }).then(() => {
+    const recordBtn = document.createElement("button");
+    recordBtn.innerText = "Record";
+    recordBtn.onclick = () => {
+      // Send data to Google Sheet
+      fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          secret: SECRET,
+          day: new Date().toDateString(),
+          routine: workouts[currentWorkoutIndex].name,
+          exercise: ex.name,
+          set: ex.currentSet,
+          weight: weightInput.value,
+          reps: repsInput.value
+        })
+      }).then(() => {
+        // Clear inputs
+        weightInput.value = "";
+        repsInput.value = "";
+        ex.currentSet++;
+
+        if (ex.currentSet > 6) {
+          recordBtn.disabled = true;
           weightInput.disabled = true;
           repsInput.disabled = true;
-          recordBtn.disabled = true;
-        });
-      };
-      setRow.appendChild(recordBtn);
+          setLabel.innerText = "All sets completed ✅";
+        } else {
+          setLabel.innerText = "Set " + ex.currentSet;
+        }
+      });
+    };
+    setRow.appendChild(recordBtn);
 
-      card.appendChild(setRow);
-    }
-
+    card.appendChild(setRow);
     container.appendChild(card);
   });
 }
+
 </script>
 
 </body>
