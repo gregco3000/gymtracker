@@ -89,12 +89,10 @@
 
 <body>
 
-<!-- HEADER -->
 <h1 id="nextWorkoutTitle">Next Workout</h1>
 <button class="start-btn" onclick="startWorkout()">START WORKOUT</button>
 <button class="finish-btn" onclick="finishWorkout()">FINISH WORKOUT</button>
 
-<!-- WORKOUT CONTENT -->
 <div id="workoutContent" style="display:none;"></div>
 
 <script>
@@ -114,6 +112,11 @@ const workouts = [
         name: "Dumbbell Bench Press",
         target: 12,
         image: "icons/exercises/dumbell_bench_press.png"
+      },
+      {
+        name: "Incline Bench Press (Smith Machine)",
+        target: 12,
+        image: "icons/exercises/incline_bench_press.png"
       }
     ]
   },
@@ -232,4 +235,12 @@ function renderWorkout() {
       });
     };
 
-    setRow.append(setLabel, weightInput, reps
+    setRow.append(setLabel, weightInput, repsInput, recordBtn);
+    card.append(title, img, setRow);
+    container.appendChild(card);
+  });
+}
+</script>
+
+</body>
+</html>
