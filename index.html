@@ -67,7 +67,7 @@
   }
 
   input {
-    width: 60px;
+    width: 60px;   /* updated field width */
     padding: 8px;
     font-size: 18px;
     border-radius: 8px;
@@ -98,7 +98,7 @@
 <script>
 /* ================= CONFIG ================= */
 
-const API_URL = "https://script.google.com/macros/s/AKfycby5wNhKTGpPYjGKqomUDORPvxoyjRjPlAc1xDB9sjVDF4BaPFns3o2qVy30GoF22M8mnA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycby2nfPNYA1HNqWZSTgMTIycbqlyiRCL13iVb5ySIQ_7GkEACtZRp3uqUBAocs8XLdxoMw/exec";
 const SECRET = "version2";
 const MAX_SETS = 6;
 
@@ -209,7 +209,7 @@ function renderWorkout() {
     recordBtn.onclick = () => {
       fetch(API_URL, {
         method: "POST",
-        mode: "cors",   // <- explicitly allow cross-origin
+        mode: "cors",  // CORS enabled
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           secret: SECRET,
@@ -220,20 +220,23 @@ function renderWorkout() {
           weight: weightInput.value,
           reps: repsInput.value
         })
-      }).then(() => {
-        ex.currentSet++;
-        weightInput.value = "";
-        repsInput.value = "";
+      })
+      .then(res => res.text())
+      .then(console.log)
+      .catch(console.error);
 
-        if (ex.currentSet > MAX_SETS) {
-          recordBtn.disabled = true;
-          weightInput.disabled = true;
-          repsInput.disabled = true;
-          setLabel.innerText = "Completed ✅";
-        } else {
-          setLabel.innerText = "Set " + ex.currentSet;
-        }
-      });
+      ex.currentSet++;
+      weightInput.value = "";
+      repsInput.value = "";
+
+      if (ex.currentSet > MAX_SETS) {
+        recordBtn.disabled = true;
+        weightInput.disabled = true;
+        repsInput.disabled = true;
+        setLabel.innerText = "Completed ✅";
+      } else {
+        setLabel.innerText = "Set " + ex.currentSet;
+      }
     };
 
     setRow.append(setLabel, weightInput, repsInput, recordBtn);
