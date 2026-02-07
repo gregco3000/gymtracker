@@ -209,6 +209,7 @@ function renderWorkout() {
     recordBtn.onclick = () => {
       fetch(API_URL, {
         method: "POST",
+        mode: "cors",   // <- explicitly allow cross-origin
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           secret: SECRET,
