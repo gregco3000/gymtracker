@@ -68,16 +68,15 @@
 </head>
 <body>
 
-<!-- Home screen -->
-<div id="home-screen">
-  <h1 id="next-workout-title">Next Workout: Loading…</h1>
+<!-- Header / Controls -->
+<div id="header">
+  <h1 id="next-workout-title"></h1>
   <button class="start-btn" onclick="startWorkout()">START WORKOUT</button>
   <button class="finish-btn" onclick="finishWorkout()">FINISH WORKOUT</button>
 </div>
 
-<!-- Workout screen -->
-<div id="workout-screen" style="display:none;">
-  <h1 id="workout-header">Workout</h1>
+<!-- Workout content (hidden until started) -->
+<div id="workout-content" style="display:none;">
   <div id="exercises-container"></div>
 </div>
 
@@ -136,17 +135,28 @@ document.getElementById("next-workout-title").innerText =
 
 // Start Workout
 function startWorkout() {
-  document.getElementById("home-screen").style.display = "none";
-  document.getElementById("workout-screen").style.display = "block";
-  document.getElementById("workout-header").innerText = workouts[currentWorkoutIndex].name;
+   document.getElementById("workout-content").style.display = "block";
   renderExercises();
 }
 
 // Finish Workout
 function finishWorkout() {
-  localStorage.setItem("lastWorkoutDone", currentWorkoutIndex);
-  alert("Workout marked as complete!");
-  location.reload();
+ localStorage.setItem("lastWorkoutDone", currentWorkoutIndex);
+
+  // Advance workout
+  currentWorkoutIndex++;
+  if (currentWorkoutIndex >= workouts.length) {
+    currentWorkoutIndex = 0;
+  }
+
+  // Reset UI
+  document.getElementById("workout-content").style.display = "none";
+  document.getElementById("exercises-container").innerHTML = "";
+
+  document.getElementById("next-workout-title").innerText =
+    "Next Workout: " + workouts[currentWorkoutIndex].name;
+
+  alert("Workout finished 💪");
 }
 
 // Render exercise cards
