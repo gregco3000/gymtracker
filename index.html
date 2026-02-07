@@ -1,215 +1,210 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <title>Workout Tracker</title>
+
 <style>
   body {
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    margin: 0;
     padding: 12px;
-    background: #fff;
+    background: #ffffff;
     color: #000;
   }
-  h1, h2 {
+
+  h1 {
+    font-size: 26px;
+    margin-bottom: 10px;
     text-align: center;
-    margin-bottom: 16px;
   }
+
   button {
-    font-size: 20px;
     width: 100%;
     padding: 14px;
-    margin: 8px 0;
+    margin: 6px 0;
+    font-size: 20px;
     border: none;
     border-radius: 12px;
-    color: white;
+    color: #fff;
   }
-  .start-btn { background: #28a745; }   /* green */
-  .finish-btn { background: #dc3545; }  /* red */
+
+  .start-btn { background: #28a745; }
+  .finish-btn { background: #dc3545; }
+
   .exercise-card {
     border: 1px solid #ddd;
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
   }
-  .exercise-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
+
+  .exercise-title {
+    font-size: 20px;
+    margin-bottom: 6px;
   }
-  .exercise-header img {
-    width: 40px;
-    height: 40px;
-    margin-right: 12px;
+
+  .exercise-image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
+    border-radius: 12px;
+    background: #f5f5f5;
+    margin-bottom: 10px;
   }
+
   .set-row {
     display: flex;
     align-items: center;
-    margin-bottom: 6px;
+    gap: 6px;
   }
-  .set-row input {
-    width: 80px;
-    padding: 6px;
+
+  .set-label {
+    min-width: 60px;
+    font-size: 16px;
+  }
+
+  input {
+    width: 90px;
+    padding: 8px;
     font-size: 18px;
-    margin-right: 6px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
   }
-  .set-row button {
+
+  .record-btn {
     flex: 1;
     background: #007AFF;
-    font-size: 16px;
+    font-size: 18px;
+    border-radius: 10px;
   }
-  .set-row button:disabled {
-    background: #ccc;
-  }
-  .set-label {
-    width: 60px;
-    font-size: 16px;
+
+  .record-btn:disabled {
+    background: #bbb;
   }
 </style>
 </head>
+
 <body>
 
-<!-- Header / Controls -->
-<div id="header">
-  <h1 id="next-workout-title"></h1>
-  <button class="start-btn" onclick="startWorkout()">START WORKOUT</button>
-  <button class="finish-btn" onclick="finishWorkout()">FINISH WORKOUT</button>
-</div>
+<!-- HEADER -->
+<h1 id="nextWorkoutTitle">Next Workout</h1>
+<button class="start-btn" onclick="startWorkout()">START WORKOUT</button>
+<button class="finish-btn" onclick="finishWorkout()">FINISH WORKOUT</button>
 
-<!-- Workout content (hidden until started) -->
-<div id="workout-content" style="display:none;">
-  <div id="exercises-container"></div>
-</div>
+<!-- WORKOUT CONTENT -->
+<div id="workoutContent" style="display:none;"></div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbyGXzlyH2hhTfS5KGaF5qucdjVyAacT5oz0RBnhSG4__VS8sGQcahKGg_HeOilOpvHeAw/exec";  // your Google Script URL
-const SECRET = "version2";    // your secret
+/* ================= CONFIG ================= */
 
-// Define workouts
+const API_URL = "https://script.google.com/macros/s/AKfycbxp5-dbIgYGIBoD_ufCTc7CRcSjMrAKS9-UmzpObPIl0-oQyxnXcDg3iIFlc0wg1j_0AQ/exec";
+const SECRET = "version2";
+const MAX_SETS = 6;
+
+/* ================= WORKOUT DATA ================= */
+
 const workouts = [
   {
     name: "Workout 1 – Chest and Triceps",
     exercises: [
-      { name: "Dumbbell Bench Press", target: 12, icon: "icons/strength.svg" },
-      { name: "Incline Bench Press", target: 12, icon: "icons/strength.svg" },
-      { name: "Bench Dips", target: 20, icon: "icons/strength.svg" },
-      { name: "Dumbbell Flys", target: 12, icon: "icons/strength.svg" },
-      { name: "Overhead Triceps Extension", target: 15, icon: "icons/strength.svg" },
-      { name: "Rope Triceps Extension", target: 15, icon: "icons/strength.svg" }
+      {
+        name: "Dumbbell Bench Press",
+        target: 12,
+        image: "icons/exercises/dumbell_bench_press.png"
+      }
     ]
   },
   {
     name: "Workout 2 – Back and Biceps",
-    exercises: [
-      { name: "Lat Pulldown", target: 12, icon: "icons/back.svg" },
-      { name: "Seated Cable Row", target: 12, icon: "icons/back.svg" },
-      { name: "One Arm Dumbbell Row", target: 12, icon: "icons/back.svg" },
-      { name: "Dumbbell Deadlift", target: 12, icon: "icons/back.svg" },
-      { name: "Hammer Curls", target: 15, icon: "icons/biceps.svg" },
-      { name: "Cable Curls", target: 15, icon: "icons/biceps.svg" }
-    ]
+    exercises: []
   },
   {
     name: "Workout 3 – Legs and Shoulders",
-    exercises: [
-      { name: "Leg Press", target: 12, icon: "icons/legs.svg" },
-      { name: "Leg Extensions", target: 15, icon: "icons/legs.svg" },
-      { name: "Leg Curls", target: 15, icon: "icons/legs.svg" },
-      { name: "Calf Raises", target: 20, icon: "icons/legs.svg" },
-      { name: "Machine Shoulder Press", target: 15, icon: "icons/shoulders.svg" },
-      { name: "Lateral Raises", target: 15, icon: "icons/shoulders.svg" }
-    ]
+    exercises: []
   }
 ];
 
-// Track next workout index
+/* ================= STATE ================= */
+
 let currentWorkoutIndex = 0;
 
-// Load next workout from localStorage or default
-if (localStorage.getItem("lastWorkoutDone")) {
-  currentWorkoutIndex = parseInt(localStorage.getItem("lastWorkoutDone")) + 1;
-  if (currentWorkoutIndex >= workouts.length) currentWorkoutIndex = 0;
+if (localStorage.getItem("lastWorkoutIndex")) {
+  currentWorkoutIndex = Number(localStorage.getItem("lastWorkoutIndex"));
 }
 
-document.getElementById("next-workout-title").innerText =
-  "Next Workout: " + workouts[currentWorkoutIndex].name;
+/* ================= INIT ================= */
 
-// Start Workout
+updateTitle();
+
+/* ================= FUNCTIONS ================= */
+
+function updateTitle() {
+  document.getElementById("nextWorkoutTitle").innerText =
+    "Next Workout: " + workouts[currentWorkoutIndex].name;
+}
+
 function startWorkout() {
-   document.getElementById("workout-content").style.display = "block";
-  renderExercises();
+  document.getElementById("workoutContent").style.display = "block";
+  renderWorkout();
 }
 
-// Finish Workout
 function finishWorkout() {
- localStorage.setItem("lastWorkoutDone", currentWorkoutIndex);
+  localStorage.setItem("lastWorkoutIndex", currentWorkoutIndex);
 
-  // Advance workout
   currentWorkoutIndex++;
   if (currentWorkoutIndex >= workouts.length) {
     currentWorkoutIndex = 0;
   }
 
-  // Reset UI
-  document.getElementById("workout-content").style.display = "none";
-  document.getElementById("exercises-container").innerHTML = "";
+  document.getElementById("workoutContent").style.display = "none";
+  document.getElementById("workoutContent").innerHTML = "";
 
-  document.getElementById("next-workout-title").innerText =
-    "Next Workout: " + workouts[currentWorkoutIndex].name;
-
-  alert("Workout finished 💪");
+  updateTitle();
+  alert("Workout complete 💪");
 }
 
-// Render exercise cards
-function renderExercises() {
-  const container = document.getElementById("exercises-container");
+function renderWorkout() {
+  const container = document.getElementById("workoutContent");
   container.innerHTML = "";
 
-  workouts[currentWorkoutIndex].exercises.forEach((ex, exIndex) => {
-    // Track current set per exercise
-    if (!ex.currentSet) ex.currentSet = 1;
+  workouts[currentWorkoutIndex].exercises.forEach(ex => {
+    ex.currentSet = 1;
 
     const card = document.createElement("div");
     card.className = "exercise-card";
 
-    // Exercise header with icon
-    const header = document.createElement("div");
-    header.className = "exercise-header";
-    const icon = document.createElement("img");
-    icon.src = ex.icon;
-    icon.alt = ex.name;
-    icon.style.width = "40px";
-    icon.style.height = "40px";
-    icon.style.marginRight = "12px";
     const title = document.createElement("div");
+    title.className = "exercise-title";
     title.innerText = `${ex.name} (Target: ${ex.target})`;
-    header.appendChild(icon);
-    header.appendChild(title);
-    card.appendChild(header);
 
-    // Single set input line
+    const img = document.createElement("img");
+    img.src = ex.image;
+    img.className = "exercise-image";
+
     const setRow = document.createElement("div");
     setRow.className = "set-row";
 
     const setLabel = document.createElement("div");
     setLabel.className = "set-label";
-    setLabel.innerText = "Set " + ex.currentSet;
-    setRow.appendChild(setLabel);
+    setLabel.innerText = "Set 1";
 
     const weightInput = document.createElement("input");
     weightInput.type = "number";
     weightInput.placeholder = "Weight";
-    setRow.appendChild(weightInput);
 
     const repsInput = document.createElement("input");
     repsInput.type = "number";
     repsInput.placeholder = "Reps";
-    setRow.appendChild(repsInput);
 
     const recordBtn = document.createElement("button");
+    recordBtn.className = "record-btn";
     recordBtn.innerText = "Record";
+
     recordBtn.onclick = () => {
-      // Send data to Google Sheet
-      fetch(API, {
+      fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -222,29 +217,19 @@ function renderExercises() {
           reps: repsInput.value
         })
       }).then(() => {
-        // Clear inputs
+        ex.currentSet++;
         weightInput.value = "";
         repsInput.value = "";
-        ex.currentSet++;
 
-        if (ex.currentSet > 6) {
+        if (ex.currentSet > MAX_SETS) {
           recordBtn.disabled = true;
           weightInput.disabled = true;
           repsInput.disabled = true;
-          setLabel.innerText = "All sets completed ✅";
+          setLabel.innerText = "Completed ✅";
         } else {
           setLabel.innerText = "Set " + ex.currentSet;
         }
       });
     };
-    setRow.appendChild(recordBtn);
 
-    card.appendChild(setRow);
-    container.appendChild(card);
-  });
-}
-
-</script>
-
-</body>
-</html>
+    setRow.append(setLabel, weightInput, reps
