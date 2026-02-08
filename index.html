@@ -12,12 +12,10 @@
     margin: 0;
     padding: 12px;
     background: #ffffff;
-    color: #000;
   }
 
   h1 {
     font-size: 26px;
-    margin-bottom: 10px;
     text-align: center;
   }
 
@@ -63,7 +61,6 @@
 
   .set-label {
     min-width: 60px;
-    font-size: 16px;
   }
 
   input {
@@ -101,11 +98,11 @@
 
 const API_URL = "https://script.google.com/macros/s/AKfycby2nfPNYA1HNqWZSTgMTIycbqlyiRCL13iVb5ySIQ_7GkEACtZRp3uqUBAocs8XLdxoMw/exec";
 const SECRET = "version2";
+const ROUTINE = "Chest & Triceps";
 
 /* ================= WORKOUT DATA ================= */
 
 const workout = {
-  routine: "Chest & Triceps",
   exercises: [
     { name: "Dumbbell Bench Press", image: "icons/exercises/dumbbell_bench_press.png" },
     { name: "Incline Bench Press", image: "icons/exercises/incline_bench_press.png" },
@@ -116,7 +113,7 @@ const workout = {
   ]
 };
 
-/* ================= UI LOGIC ================= */
+/* ================= UI ================= */
 
 function startWorkout() {
   const container = document.getElementById("workoutContent");
@@ -129,8 +126,8 @@ function startWorkout() {
     card.dataset.set = 1;
 
     card.innerHTML = `
-      <div class="exercise-title">${ex.routine}</div>
-      <img src="${ex.image}" class="exercise-image" alt="${ex.routine}">
+      <div class="exercise-title">${ex.name}</div>
+      <img src="${ex.image}" class="exercise-image">
       <div class="set-row">
         <div class="set-label">Set 1</div>
         <input type="number" placeholder="Wt">
@@ -139,29 +136,37 @@ function startWorkout() {
       </div>
     `;
 
-    const recordBtn = card.querySelector(".record-btn");
-    recordBtn.onclick = () => recordSet(card, ex.routine);
+    card.querySelector(".record-btn").onclick = () =>
+      recordSet(card, ex.name);
 
     container.appendChild(card);
   });
 }
 
-function recordSet(card, exerciseName) {
+function recordSet(card, exercise) {
   let set = parseInt(card.dataset.set);
   if (set > 6) return;
 
-  const inputs = card.querySelectorAll("input");
-  const weight = inputs[0].value;
-  const reps = inputs[1].value;
+  const [weightInput, repsInput] = card.querySelectorAll("input");
+  const weight = Number(weightInput.value);
+  const reps = Number(repsInput.value);
 
-  if (!weight || !reps) return alert("Enter weight and reps");
+  if (!weight || !reps) {
+    alert("Enter weight and reps");
+    return;
+  }
 
-  sendToSheet(exerciseName, set, weight, reps);
+  const volume = weight * reps;
+
+  sendToSheet(exercise, reps, weight, volume);
 
   set++;
   card.dataset.set = set;
-  card.querySelector(".set-label").textContent = set <= 6 ? `Set ${set}` : "Done";
-  inputs.forEach(i => i.value = "");
+  card.querySelector(".set-label").textContent =
+    set <= 6 ? `Set ${set}` : "Done";
+
+  weightInput.value = "";
+  repsInput.value = "";
 
   if (set > 6) card.querySelector(".record-btn").disabled = true;
 }
@@ -173,20 +178,19 @@ function finishWorkout() {
 
 /* ================= DATA ================= */
 
-function sendToSheet(exercise, set, weight, reps) {
+function sendToSheet(exercise, reps, weight, volume) {
   fetch(API_URL, {
     method: "POST",
     mode: "no-cors",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       secret: SECRET,
-      time: new Date().toLocaleTimeString()
-      routine,
+      time: new Date().toLocaleTimeString(),
+      routine: ROUTINE,
       exercise,
-      set,
-      weight,
       reps,
-     
+      weight,
+      volume
     })
   });
 }
