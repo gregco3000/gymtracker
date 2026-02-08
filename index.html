@@ -178,19 +178,18 @@ function finishWorkout() {
 
 /* ================= DATA ================= */
 
-function sendToSheet(exercise, reps, weight, volume) {
+function sendToSheet(exercise, set, weight, reps) {
   fetch(API_URL, {
     method: "POST",
     mode: "no-cors",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       secret: SECRET,
-      time: new Date().toLocaleTimeString(),
       routine: ROUTINE,
       exercise,
-      reps,
+      set,
       weight,
-      volume
+      reps
     })
   });
 }
