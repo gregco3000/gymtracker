@@ -156,9 +156,7 @@ function recordSet(card, exercise) {
     return;
   }
 
-  const volume = weight * reps;
-
-  sendToSheet(exercise, reps, weight, volume);
+  sendToSheet(exercise, set, weight, reps);
 
   set++;
   card.dataset.set = set;
