@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>Workout Tracker</title>
+
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    margin: 0;
+    padding: 12px;
+    background: #ffffff;
+  }
+
+  h1 {
+    font-size: 26px;
+    text-align: center;
+  }
+
+  button {
+    width: 100%;
+    padding: 14px;
+    margin: 6px 0;
+    font-size: 20px;
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+  }
+
+  .start-btn { background: #28a745; }
+  .finish-btn { background: #dc3545; }
+
+  .exercise-card {
+    border: 1px solid #ddd;
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 18px;
+  }
+
+  .exercise-title {
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+
+  .exercise-image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
+    border-radius: 12px;
+    background: #f5f5f5;
+    margin-bottom: 10px;
+  }
+
+  .set-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .set-label {
+    min-width: 60px;
+  }
+
+  input {
+    width: 60px;
+    padding: 8px;
+    font-size: 18px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+
+  .record-btn {
+    flex: 1;
+    background: #007AFF;
+    font-size: 18px;
+    border-radius: 10px;
+  }
+
+  .record-btn:disabled {
+    background: #bbb;
+  }
+</style>
+</head>
+
+<body>
+
+<h1 id="nextWorkoutTitle">Next Workout: Chest & Triceps</h1>
+
+<button class="start-btn" onclick="startWorkout()">START WORKOUT</button>
+<button class="finish-btn" onclick="finishWorkout()">FINISH WORKOUT</button>
+
+<div id="workoutContent" style="display:none;"></div>
+
+<script>
+/* ================= CONFIG ================= */
+
+const API_URL = "https://script.google.com/macros/s/AKfycbxNf-HYK03eMC8qylObxN5-3S-d17VygSd1BT53Hx6V-4z1bjQJSS5IGtVBxLC0c8Fq/exec";
+const SECRET = "version2";
+const ROUTINE = "Chest & Triceps";
+
+/* ================= WORKOUT DATA ================= */
+
+const workout = {
+  exercises: [
+    { name: "Dumbbell Bench Press", image: "icons/exercises/dumbbell_bench_press.png" },
+    { name: "Incline Bench Press", image: "icons/exercises/incline_bench_press.png" },
+    { name: "Bench Dips", image: "icons/exercises/bench_dip.png" },
+    { name: "Dumbbell Fly", image: "icons/exercises/dumbbell_fly.png" },
+    { name: "Overhead Triceps Extension", image: "icons/exercises/tricep_ext.png" },
+    { name: "Rope Triceps Extension", image: "icons/exercises/rope_tricep_ext.png" }
+  ]
+};
+
+/* ================= UI ================= */
+
+function startWorkout() {
+  const container = document.getElementById("workoutContent");
+  container.innerHTML = "";
+  container.style.display = "block";
+
+  workout.exercises.forEach(ex => {
+    const card = document.createElement("div");
+    card.className = "exercise-card";
+    card.dataset.set = 1;
+
+    card.innerHTML = `
+      <div class="exercise-title">${ex.name}</div>
+      <img src="${ex.image}" class="exercise-image">
+      <div class="set-row">
+        <div class="set-label">Set 1</div>
+        <input type="number" placeholder="Wt">
+        <input type="number" placeholder="Reps">
+        <button class="record-btn">Record</button>
+      </div>
+    `;
+
+    card.querySelector(".record-btn").onclick = () =>
+      recordSet(card, ex.name);
+
+    container.appendChild(card);
+  });
+}
+
+function recordSet(card, exercise) {
+  let set = parseInt(card.dataset.set);
+  if (set > 6) return;
+
+  const [weightInput, repsInput] = card.querySelectorAll("input");
+  const weight = Number(weightInput.value);
+  const reps = Number(repsInput.value);
+
+  if (!weight || !reps) {
+    alert("Enter weight and reps");
+    return;
+  }
+
+  sendToSheet(exercise, set, weight, reps);
+
+  set++;
+  card.dataset.set = set;
+  card.querySelector(".set-label").textContent =
+    set <= 6 ? `Set ${set}` : "Done";
+
+  weightInput.value = "";
+  repsInput.value = "";
+
+  if (set > 6) card.querySelector(".record-btn").disabled = true;
+}
+
+function finishWorkout() {
+  document.getElementById("workoutContent").style.display = "none";
+  alert("Workout complete!");
+}
+
+/* ================= DATA ================= */
+
+function sendToSheet(exercise, set, weight, reps) {
+  fetch(API_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      secret: SECRET,
+      routine: ROUTINE,
+      exercise,
+      set,
+      weight,
+      reps
+    })
+  });
+}
+</script>
+
+</body>
+</html>
