@@ -118,7 +118,7 @@ const routines = {
     ["Incline Bench Press", "incline_bench_press.png"],
     ["Bench Dip", "bench_dip.png"],
     ["Dumbbell Fly", "dumbbell_fly.png"],
-    ["Overhead Tricep Extension", "overhead_tricep_ext.png"],
+    ["Overhead Tricep Extension", "tricep_ext.png"],
     ["Rope Tricep Pushdown", "rope_tricep_ext.png"]
   ],
   "Back & Biceps": [
@@ -154,7 +154,10 @@ document.getElementById("nextWorkoutLabel").textContent = getNextRoutine();
 /* ================= WORKOUT FLOW ================= */
 
 function startRoutine(name) {
-  activeRoutine = name;
+  if (!activeRoutine) {
+    alert("No active routine selected.");
+    return;
+  }
   document.getElementById("landing").classList.add("hidden");
   document.getElementById("workout").classList.remove("hidden");
   document.getElementById("routineTitle").textContent = name;
@@ -173,8 +176,8 @@ function startRoutine(name) {
       <div class="exercise-title">${exercise}</div>
       <div class="set-label">Set 1</div>
       <div class="inputs">
-        <input placeholder="Weight">
-        <input placeholder="Reps">
+        <input type="number" inputmode="numeric" min="0" step="1" placeholder="Weight">
+        <input type="number" inputmode="numeric" min="0" step="1" placeholder="Reps">
       </div>
       <button onclick="recordSet(this)">Record</button>
     `;
