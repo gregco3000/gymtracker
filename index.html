@@ -1,243 +1,219 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Workout Logger</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workout Logger</title>
 
-  <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      margin: 0;
-      padding: 16px;
-      background: #f7f7f7;
-    }
+<style>
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 0;
+  padding: 16px;
+  background: #f7f7f7;
+}
 
-    h1 {
-      text-align: center;
-      margin-bottom: 12px;
-    }
+h1, h2 {
+  text-align: center;
+  margin: 8px 0;
+}
 
-    .nav {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      margin-bottom: 16px;
-    }
+.hidden { display: none; }
 
-    button {
-      padding: 10px 14px;
-      border: none;
-      border-radius: 12px;
-      background: #111;
-      color: #fff;
-      font-size: 14px;
-      cursor: pointer;
-    }
+button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  border: none;
+  font-size: 16px;
+  background: #111;
+  color: #fff;
+  margin-bottom: 12px;
+}
 
-    button.secondary {
-      background: #555;
-    }
+button.secondary {
+  background: #555;
+}
 
-    .routine {
-      display: none;
-    }
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
 
-    .routine.active {
-      display: block;
-    }
+.card img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  border-radius: 16px;
+  background: #eee;
+  margin-bottom: 8px;
+}
 
-    .card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 12px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    }
+.exercise-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
 
-    .card img {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      object-fit: contain;
-      border-radius: 16px;
-      margin-bottom: 8px;
-      background: #eee;
-    }
+.inputs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
 
-    .exercise-title {
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
+input {
+  width: 60px;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
 
-    .inputs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    input {
-      width: 60px;
-      padding: 6px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-    }
-
-    .set-label {
-      font-size: 13px;
-      margin-bottom: 6px;
-    }
-
-    .record-btn {
-      width: 100%;
-    }
-  </style>
+.set-label {
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+</style>
 </head>
 
 <body>
 
-<h1>Workout Logger</h1>
+<!-- ================= LANDING ================= -->
 
-<div class="nav">
-  <button onclick="showRoutine('chest')">Chest & Triceps</button>
-  <button onclick="showRoutine('back')">Back & Biceps</button>
-  <button onclick="showRoutine('legs')">Legs & Shoulders</button>
+<div id="landing">
+  <h1>Next Workout</h1>
+  <h2 id="nextWorkoutLabel"></h2>
+
+  <button onclick="startRoutine('Chest & Triceps')">Chest & Triceps</button>
+  <button onclick="startRoutine('Back & Biceps')">Back & Biceps</button>
+  <button onclick="startRoutine('Legs & Shoulders')">Legs & Shoulders</button>
 </div>
 
-<!-- ================= CHEST & TRICEPS ================= -->
+<!-- ================= WORKOUT ================= -->
 
-<div id="chest" class="routine active">
-  <script>const ROUTINE = "Chest & Triceps";</script>
+<div id="workout" class="hidden">
+  <h1 id="routineTitle"></h1>
 
-  <div class="card" data-exercise="Dumbbell Bench Press" data-set="1">
-    <img src="icons/exercises/dumbbell_bench_press.png">
-    <div class="exercise-title">Dumbbell Bench Press</div>
-    <div class="set-label">Set 1</div>
-    <div class="inputs">
-      <input placeholder="Weight">
-      <input placeholder="Reps">
-    </div>
-    <button class="record-btn" onclick="recordSet(this)">Record</button>
-  </div>
+  <div id="exerciseContainer"></div>
 
-  <div class="card" data-exercise="Incline Bench Press" data-set="1">
-    <img src="icons/exercises/incline_bench_press.png">
-    <div class="exercise-title">Incline Bench Press</div>
-    <div class="set-label">Set 1</div>
-    <div class="inputs">
-      <input placeholder="Weight">
-      <input placeholder="Reps">
-    </div>
-    <button class="record-btn" onclick="recordSet(this)">Record</button>
-  </div>
-
-  <div class="card" data-exercise="Bench Dip" data-set="1">
-    <img src="icons/exercises/bench_dip.png">
-    <div class="exercise-title">Bench Dip</div>
-    <div class="set-label">Set 1</div>
-    <div class="inputs">
-      <input placeholder="Weight">
-      <input placeholder="Reps">
-    </div>
-    <button class="record-btn" onclick="recordSet(this)">Record</button>
-  </div>
-
-  <div class="card" data-exercise="Dumbbell Fly" data-set="1">
-    <img src="icons/exercises/dumbbell_fly.png">
-    <div class="exercise-title">Dumbbell Fly</div>
-    <div class="set-label">Set 1</div>
-    <div class="inputs">
-      <input placeholder="Weight">
-      <input placeholder="Reps">
-    </div>
-    <button class="record-btn" onclick="recordSet(this)">Record</button>
-  </div>
-
-  <div class="card" data-exercise="Overhead Tricep Extension" data-set="1">
-    <img src="icons/exercises/tricep_ext.png">
-    <div class="exercise-title">Overhead Tricep Extension</div>
-    <div class="set-label">Set 1</div>
-    <div class="inputs">
-      <input placeholder="Weight">
-      <input placeholder="Reps">
-    </div>
-    <button class="record-btn" onclick="recordSet(this)">Record</button>
-  </div>
-
-  <div class="card" data-exercise="Rope Tricep Pushdown" data-set="1">
-    <img src="icons/exercises/rope_tricep_ext.png">
-    <div class="exercise-title">Rope Tricep Pushdown</div>
-    <div class="set-label">Set 1</div>
-    <div class="inputs">
-      <input placeholder="Weight">
-      <input placeholder="Reps">
-    </div>
-    <button class="record-btn" onclick="recordSet(this)">Record</button>
-  </div>
+  <button class="secondary" onclick="completeWorkout()">Complete Workout</button>
 </div>
-
-<!-- ================= BACK & BICEPS ================= -->
-
-<div id="back" class="routine">
-  <script>const ROUTINE_BACK = "Back & Biceps";</script>
-
-  <div class="card" data-exercise="Lat Pulldown" data-set="1">
-    <img src="icons/exercises/lat_pulldown.png">
-    <div class="exercise-title">Lat Pulldown</div>
-    <div class="set-label">Set 1</div>
-    <div class="inputs">
-      <input placeholder="Weight">
-      <input placeholder="Reps">
-    </div>
-    <button class="record-btn" onclick="recordSet(this, ROUTINE_BACK)">Record</button>
-  </div>
-
-  <!-- repeat pattern -->
-</div>
-
-<!-- ================= LEGS & SHOULDERS ================= -->
-
-<div id="legs" class="routine">
-  <script>const ROUTINE_LEGS = "Legs & Shoulders";</script>
-
-  <div class="card" data-exercise="Leg Press" data-set="1">
-    <img src="icons/exercises/leg_press.png">
-    <div class="exercise-title">Leg Press</div>
-    <div class="set-label">Set 1</div>
-    <div class="inputs">
-      <input placeholder="Weight">
-      <input placeholder="Reps">
-    </div>
-    <button class="record-btn" onclick="recordSet(this, ROUTINE_LEGS)">Record</button>
-  </div>
-
-  <!-- repeat pattern -->
-</div>
-
-<!-- ================= SCRIPT ================= -->
 
 <script>
+/* ================= CONFIG ================= */
+
 const API_URL = "https://script.google.com/macros/s/AKfycby2nfPNYA1HNqWZSTgMTIycbqlyiRCL13iVb5ySIQ_7GkEACtZRp3uqUBAocs8XLdxoMw/exec";
 const SECRET = "version2";
 
-function showRoutine(id) {
-  document.querySelectorAll(".routine").forEach(r => r.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+const routineOrder = [
+  "Chest & Triceps",
+  "Back & Biceps",
+  "Legs & Shoulders"
+];
+
+const routines = {
+  "Chest & Triceps": [
+    ["Dumbbell Bench Press", "dumbbell_bench_press.png"],
+    ["Incline Bench Press", "incline_bench_press.png"],
+    ["Bench Dip", "bench_dip.png"],
+    ["Dumbbell Fly", "dumbbell_fly.png"],
+    ["Overhead Tricep Extension", "overhead_tricep_ext.png"],
+    ["Rope Tricep Pushdown", "rope_tricep_ext.png"]
+  ],
+  "Back & Biceps": [
+    ["Lat Pulldown", "lat_pulldown.png"],
+    ["Seated Cable Row", "seated_cable_row.png"],
+    ["One Arm Dumbbell Row", "one_arm_db_row.png"],
+    ["Dumbbell Deadlift", "dumbbell_deadlift.png"],
+    ["Hammer Curls", "hammer_curl.png"],
+    ["Cable Curls", "cable_curl.png"]
+  ],
+  "Legs & Shoulders": [
+    ["Leg Press", "leg_press.png"],
+    ["Leg Extensions", "leg_extension.png"],
+    ["Leg Curls", "leg_curl.png"],
+    ["Calf Raises", "calf_raise.png"],
+    ["Machine Shoulder Press", "machine_shoulder_press.png"],
+    ["Lateral Raises", "lateral_raise.png"]
+  ]
+};
+
+let activeRoutine = null;
+
+/* ================= LANDING LOGIC ================= */
+
+function getNextRoutine() {
+  const last = localStorage.getItem("lastRoutine");
+  if (!last) return routineOrder[0];
+  return routineOrder[(routineOrder.indexOf(last) + 1) % routineOrder.length];
 }
 
-function recordSet(btn, routineOverride) {
+document.getElementById("nextWorkoutLabel").textContent = getNextRoutine();
+
+/* ================= WORKOUT FLOW ================= */
+
+function startRoutine(name) {
+  activeRoutine = name;
+  document.getElementById("landing").classList.add("hidden");
+  document.getElementById("workout").classList.remove("hidden");
+  document.getElementById("routineTitle").textContent = name;
+
+  const container = document.getElementById("exerciseContainer");
+  container.innerHTML = "";
+
+  routines[name].forEach(([exercise, img]) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.exercise = exercise;
+    card.dataset.set = 1;
+
+    card.innerHTML = `
+      <img src="icons/exercises/${img}">
+      <div class="exercise-title">${exercise}</div>
+      <div class="set-label">Set 1</div>
+      <div class="inputs">
+        <input placeholder="Weight">
+        <input placeholder="Reps">
+      </div>
+      <button onclick="recordSet(this)">Record</button>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+function completeWorkout() {
+  localStorage.setItem("lastRoutine", activeRoutine);
+  document.getElementById("workout").classList.add("hidden");
+  document.getElementById("landing").classList.remove("hidden");
+  document.getElementById("nextWorkoutLabel").textContent = getNextRoutine();
+}
+
+/* ================= LOGGING ================= */
+
+function recordSet(btn) {
   const card = btn.closest(".card");
   const inputs = card.querySelectorAll("input");
+
   const weight = Number(inputs[0].value);
   const reps = Number(inputs[1].value);
   const set = Number(card.dataset.set);
   const exercise = card.dataset.exercise;
 
-  const routine =
-    routineOverride ||
-    document.querySelector(".routine.active script").textContent.split('"')[1];
-
-  sendToSheet(exercise, set, weight, reps, routine);
+  fetch(API_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      secret: SECRET,
+      routine: activeRoutine,
+      exercise,
+      set,
+      weight,
+      reps
+    })
+  });
 
   card.dataset.set = set + 1;
   card.querySelector(".set-label").textContent =
@@ -247,22 +223,6 @@ function recordSet(btn, routineOverride) {
   inputs[1].value = "";
 
   if (set + 1 > 6) btn.disabled = true;
-}
-
-function sendToSheet(exercise, set, weight, reps, routine) {
-  fetch(API_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      secret: SECRET,
-      routine,
-      exercise,
-      set,
-      weight,
-      reps
-    })
-  });
 }
 </script>
 
