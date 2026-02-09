@@ -8,9 +8,9 @@
 <style>
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f7f7f7;
   margin: 0;
   padding: 16px;
-  background: #f7f7f7;
 }
 
 h1, h2 {
@@ -23,12 +23,12 @@ h1, h2 {
 button {
   width: 100%;
   padding: 14px;
-  border-radius: 16px;
+  margin-bottom: 12px;
   border: none;
-  font-size: 16px;
+  border-radius: 16px;
   background: #111;
   color: #fff;
-  margin-bottom: 12px;
+  font-size: 16px;
 }
 
 button.secondary {
@@ -83,21 +83,19 @@ input {
 
 <div id="landing">
   <h1>Next Workout</h1>
-  <h2 id="nextWorkoutLabel"></h2>
+  <h2 id="nextWorkout"></h2>
 
-  <button onclick="startRoutine('Chest & Triceps')">Chest & Triceps</button>
-  <button onclick="startRoutine('Back & Biceps')">Back & Biceps</button>
-  <button onclick="startRoutine('Legs & Shoulders')">Legs & Shoulders</button>
+  <button type="button" onclick="startRoutine('Chest & Triceps')">Chest & Triceps</button>
+  <button type="button" onclick="startRoutine('Back & Biceps')">Back & Biceps</button>
+  <button type="button" onclick="startRoutine('Legs & Shoulders')">Legs & Shoulders</button>
 </div>
 
 <!-- ================= WORKOUT ================= -->
 
 <div id="workout" class="hidden">
   <h1 id="routineTitle"></h1>
-
   <div id="exerciseContainer"></div>
-
-  <button class="secondary" onclick="completeWorkout()">Complete Workout</button>
+  <button class="secondary" type="button" onclick="completeWorkout()">Complete Workout</button>
 </div>
 
 <script>
@@ -114,34 +112,34 @@ const routineOrder = [
 
 const routines = {
   "Chest & Triceps": [
-    ["Dumbbell Bench Press", "dumbbell_bench_press.png"],
-    ["Incline Bench Press", "incline_bench_press.png"],
-    ["Bench Dip", "bench_dip.png"],
-    ["Dumbbell Fly", "dumbbell_fly.png"],
-    ["Overhead Tricep Extension", "tricep_ext.png"],
-    ["Rope Tricep Pushdown", "rope_tricep_ext.png"]
+    ["Dumbbell Bench Press","dumbbell_bench_press.png"],
+    ["Incline Bench Press","incline_bench_press.png"],
+    ["Bench Dip","bench_dip.png"],
+    ["Dumbbell Fly","dumbbell_fly.png"],
+    ["Overhead Tricep Extension","overhead_tricep_ext.png"],
+    ["Rope Tricep Pushdown","rope_tricep_ext.png"]
   ],
   "Back & Biceps": [
-    ["Lat Pulldown", "lat_pulldown.png"],
-    ["Seated Cable Row", "seated_cable_row.png"],
-    ["One Arm Dumbbell Row", "one_arm_db_row.png"],
-    ["Dumbbell Deadlift", "dumbbell_deadlift.png"],
-    ["Hammer Curls", "hammer_curl.png"],
-    ["Cable Curls", "cable_curl.png"]
+    ["Lat Pulldown","lat_pulldown.png"],
+    ["Seated Cable Row","seated_cable_row.png"],
+    ["One Arm Dumbbell Row","one_arm_db_row.png"],
+    ["Dumbbell Deadlift","dumbbell_deadlift.png"],
+    ["Hammer Curls","hammer_curl.png"],
+    ["Cable Curls","cable_curl.png"]
   ],
   "Legs & Shoulders": [
-    ["Leg Press", "leg_press.png"],
-    ["Leg Extensions", "leg_extension.png"],
-    ["Leg Curls", "leg_curl.png"],
-    ["Calf Raises", "calf_raise.png"],
-    ["Machine Shoulder Press", "machine_shoulder_press.png"],
-    ["Lateral Raises", "lateral_raise.png"]
+    ["Leg Press","leg_press.png"],
+    ["Leg Extensions","leg_extension.png"],
+    ["Leg Curls","leg_curl.png"],
+    ["Calf Raises","calf_raise.png"],
+    ["Machine Shoulder Press","machine_shoulder_press.png"],
+    ["Lateral Raises","lateral_raise.png"]
   ]
 };
 
 let activeRoutine = null;
 
-/* ================= LANDING LOGIC ================= */
+/* ================= LANDING ================= */
 
 function getNextRoutine() {
   const last = localStorage.getItem("lastRoutine");
@@ -149,12 +147,13 @@ function getNextRoutine() {
   return routineOrder[(routineOrder.indexOf(last) + 1) % routineOrder.length];
 }
 
-document.getElementById("nextWorkoutLabel").textContent = getNextRoutine();
+document.getElementById("nextWorkout").textContent = getNextRoutine();
 
-/* ================= WORKOUT FLOW ================= */
+/* ================= WORKOUT ================= */
 
 function startRoutine(name) {
   activeRoutine = name;
+
   document.getElementById("landing").classList.add("hidden");
   document.getElementById("workout").classList.remove("hidden");
   document.getElementById("routineTitle").textContent = name;
@@ -166,17 +165,17 @@ function startRoutine(name) {
     const card = document.createElement("div");
     card.className = "card";
     card.dataset.exercise = exercise;
-    card.dataset.set = 1;
+    card.dataset.set = "1";
 
     card.innerHTML = `
       <img src="icons/exercises/${img}">
       <div class="exercise-title">${exercise}</div>
       <div class="set-label">Set 1</div>
       <div class="inputs">
-        <input type="number" inputmode="numeric" min="0" step="1" placeholder="Weight">
-        <input type="number" inputmode="numeric" min="0" step="1" placeholder="Reps">
+        <input type="number" inputmode="numeric" placeholder="Weight">
+        <input type="number" inputmode="numeric" placeholder="Reps">
       </div>
-      <button onclick="recordSet(this)">Record</button>
+      <button type="button" onclick="recordSet(this)">Record</button>
     `;
 
     container.appendChild(card);
@@ -185,18 +184,21 @@ function startRoutine(name) {
 
 function completeWorkout() {
   localStorage.setItem("lastRoutine", activeRoutine);
+  activeRoutine = null;
+
   document.getElementById("workout").classList.add("hidden");
   document.getElementById("landing").classList.remove("hidden");
-  document.getElementById("nextWorkoutLabel").textContent = getNextRoutine();
+  document.getElementById("nextWorkout").textContent = getNextRoutine();
 }
 
 /* ================= LOGGING ================= */
 
 function recordSet(btn) {
-    if (!activeRoutine) {
+  if (!activeRoutine) {
     alert("No active routine selected.");
     return;
   }
+
   const card = btn.closest(".card");
   const inputs = card.querySelectorAll("input");
 
@@ -212,14 +214,14 @@ function recordSet(btn) {
     body: JSON.stringify({
       secret: SECRET,
       routine: activeRoutine,
-      exercise,
-      set,
-      weight,
-      reps
+      exercise: exercise,
+      set: set,
+      weight: weight,
+      reps: reps
     })
   });
 
-  card.dataset.set = set + 1;
+  card.dataset.set = String(set + 1);
   card.querySelector(".set-label").textContent =
     set + 1 <= 6 ? `Set ${set + 1}` : "Done";
 
