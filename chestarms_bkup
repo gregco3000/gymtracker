@@ -195,3 +195,100 @@ function sendToSheet(exercise, set, weight, reps) {
 
 </body>
 </html>
+
+
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ google api script$$$$$$$$$$$$$$$$$$$$$
+
+// Secret key for security (must match index.html)
+const SECRET = "version2";
+
+/**
+ * Handle POST requests from the web app
+ */
+function doPost(e) {
+  return handleRequest(e);
+}
+
+/**
+ * Handle OPTIONS requests for CORS preflight
+ */
+function doOptions(e) {
+  return ContentService.createTextOutput("")
+    .setMimeType(ContentService.MimeType.TEXT)
+    .setHeader("Access-Control-Allow-Origin", "*")
+    .setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+    .setHeader("Access-Control-Allow-Headers", "Content-Type");
+}
+
+/**
+ * Core request handler
+ */
+function handleRequest(e) {
+  try {
+    if (!e.postData || !e.postData.contents) {
+      throw new Error("No POST data received");
+    }
+
+    const data = JSON.parse(e.postData.contents);
+
+    // Check the secret
+    if (data.secret !== SECRET) {
+      throw new Error("Unauthorized request");
+    }
+
+    // Get the Log sheet
+    const logSheet = SpreadsheetApp
+      .getActiveSpreadsheet()
+      .getSheetByName("Log");
+
+    if (!logSheet) {
+      throw new Error("Log sheet not found");
+    }
+
+    const lastRow = logSheet.getLastRow();
+
+    // Get last logged exercise from Column C
+    let lastExercise = "";
+    const lookback = Math.min(6, lastRow - 1);
+
+    for (let i = 0; i < lookback; i++) {
+      const value = logSheet.getRange(lastRow - i, 3).getValue();
+      if (value) {
+        lastExercise = value;
+        break;
+  }
+}
+    const isNewExercise = data.exercise !== lastExercise;
+
+    // Always write to a new row
+    const row = lastRow + 1;
+    const now = new Date();
+
+    // Column A – Date
+    if (isNewExercise) {
+      logSheet.getRange(row, 1).setValue(now);           // A Date
+      logSheet.getRange(row, 2).setValue(data.routine); // B Routine
+      logSheet.getRange(row, 3).setValue(data.exercise);// C Exercise
+    }
+    // Column D - Set (always)
+    logSheet.getRange(row, 4).setValue(data.set);
+
+    // Column E – Timestamp (always)
+    logSheet.getRange(row, 5).setValue(now);
+
+    // Column F – Weight (always)
+    logSheet.getRange(row, 6).setValue(data.weight);
+
+    // Column G – Reps (always)
+    logSheet.getRange(row, 7).setValue(data.reps);
+
+    return ContentService.createTextOutput("OK")
+      .setMimeType(ContentService.MimeType.TEXT)
+      .setHeader("Access-Control-Allow-Origin", "*");
+
+  } catch (err) {
+    return ContentService.createTextOutput("ERROR: " + err.message)
+      .setMimeType(ContentService.MimeType.TEXT)
+      .setHeader("Access-Control-Allow-Origin", "*");
+  }
+}
